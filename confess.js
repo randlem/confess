@@ -44,7 +44,6 @@ var confess = {
                 url: request.url,
                 request: request,
                 responses: {},
-                duration: '-',
                 times: {
                     request: now
                 }
@@ -84,13 +83,18 @@ var confess = {
                 if (!resource.times.start) {
                     resource.times.start = resource.times.end;
                 }
-                if (!slowest || resource.duration > slowest.duration) {
-                    slowest = resource;
+
+                if (resource.duration) {
+                    if (!slowest || resource.duration > slowest.duration) {
+                        slowest = resource;
+                    }
+                    if (!fastest || resource.duration < fastest.duration) {
+                        fastest = resource;
+                    }
+				    totalDuration += resource.duration;
+                } else {
+                    resource.duration = '-';
                 }
-                if (!fastest || resource.duration < fastest.duration) {
-                    fastest = resource;
-                }
-                totalDuration += resource.duration;
 
                 if (resource.size) {
                     if (!largest || resource.size > largest.size) {
@@ -137,8 +141,16 @@ var confess = {
                 });
                 console.log('');
                 resources.forEach(function (resource) {
+                    var status;
+                    if (resource.responses && resource.responses['end']) {
+                        status = resource.responses['end'].status;
+                    } else {
+                        status = '-';
+                    }
+
                     console.log(
                         ths.pad(resource.id, 3) + ': ' +
+                        ths.pad(status, 3) + '; ' +
                         ths.pad(resource.duration, 6) + 'ms; ' +
                         ths.pad(resource.size, 7) + 'b; ' +
                         ths.truncate(resource.url, 84)
@@ -471,4 +483,9 @@ var confess = {
 
 }
 
-confess.run();
+try {
+    confess.run();
+} catch (e) {
+    console.error(e);
+    phantom.exit();
+}
