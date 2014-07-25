@@ -32,6 +32,22 @@ var confess = {
 
 	performance: {
 		resources: [],
+		onCallback: function (page, config, e) {
+			switch (e.type) {
+				case 'DOMContentLoaded':
+					this.performance.ready = new Date().getTime();
+					break;
+				default:
+					break;
+			}
+		},
+		onInitialized: function (page, config) {
+			page.evaluate(function() {
+				document.addEventListener('DOMContentLoaded', function(e) {
+					window.callPhantom(e);
+				}, false);
+			});
+		},
 		onLoadStarted: function (page, config) {
 			if (!this.performance.start) {
 				this.performance.start = new Date().getTime();
@@ -72,12 +88,13 @@ var confess = {
 		},
 		onLoadFinished: function (page, config, status) {
 			var start = this.performance.start,
-				finish =  new Date().getTime(),
+				finish =	new Date().getTime(),
 				resources = this.performance.resources,
 				slowest, fastest, totalDuration = 0,
 				largest, smallest, totalSize = 0,
 				missingSize = false,
-				elapsed = finish - start;
+				elapsed = finish - start,
+				domcontentloaded = this.performance.ready - start;
 
 			resources.forEach(function (resource) {
 				if (!resource.times.start) {
@@ -116,11 +133,12 @@ var confess = {
 			}
 			console.log('');
 			console.log('Elapsed load time: ' + this.pad(elapsed, 6) + 'ms');
+			console.log(' DOMContentLoaded: ' + this.pad(domcontentloaded, 6) + 'ms');
 			console.log('   # of resources: ' + this.pad(resources.length-1, 8));
 			console.log('');
-			console.log(' Fastest resource: ' + this.pad(fastest.duration, 6) + 'ms; ' + this.truncate(fastest.url));
-			console.log(' Slowest resource: ' + this.pad(slowest.duration, 6) + 'ms; ' + this.truncate(slowest.url));
-			console.log('  Total resources: ' + this.pad(totalDuration, 6) + 'ms');
+			console.log('Fastest resource: ' + this.pad(fastest.duration, 6) + 'ms; ' + this.truncate(fastest.url));
+			console.log('Slowest resource: ' + this.pad(slowest.duration, 6) + 'ms; ' + this.truncate(slowest.url));
+			console.log(' Total resources: ' + this.pad(totalDuration, 6) + 'ms');
 			console.log('');
 			console.log('Smallest resource: ' + this.pad(smallest.size, 7) + 'b; ' + this.truncate(smallest.url));
 			console.log(' Largest resource: ' + this.pad(largest.size, 7) + 'b; ' + this.truncate(largest.url));
@@ -133,8 +151,8 @@ var confess = {
 					bar;
 				resources.forEach(function (resource) {
 					bar = ths.repeat(' ', (resource.times.request - start) * ratio) +
-						  ths.repeat('-', (resource.times.start - resource.times.request) * ratio) +
-						  ths.repeat('=', (resource.times.end - resource.times.start) * ratio)
+							ths.repeat('-', (resource.times.start - resource.times.request) * ratio) +
+							ths.repeat('=', (resource.times.end - resource.times.start) * ratio)
 					;
 					bar = bar.substr(0, length) + ths.repeat(' ', length - bar.length);
 					console.log(ths.pad(resource.id, 3) + '|' + bar + '|');
@@ -359,17 +377,17 @@ var confess = {
 	emitConfig: function (config, prefix) {
 		console.log(prefix + 'Config:');
 		for (key in config) {
-		   if (config[key].constructor === Object) {
+			 if (config[key].constructor === Object) {
 				if (key===config.task) {
 					console.log(prefix + ' ' + key + ':');
 					for (key2 in config[key]) {
-						console.log(prefix + '  ' + key2 + ': ' + config[key][key2]);
+						console.log(prefix + '	' + key2 + ': ' + config[key][key2]);
 					}
 				}
-		   } else {
-			   console.log(prefix + ' ' + key + ': ' + config[key]);
-		   }
-	   }
+			 } else {
+				 console.log(prefix + ' ' + key + ': ' + config[key]);
+			 }
+		 }
 	},
 
 	load: function (config, task, scope) {
@@ -386,7 +404,7 @@ var confess = {
 			}
 			page.settings.userAgent = config.userAgent;
 		}
-		['onInitialized', 'onLoadStarted', 'onResourceRequested', 'onResourceReceived']
+		['onCallback', 'onInitialized', 'onInitialized', 'onLoadStarted', 'onResourceRequested', 'onResourceReceived']
 		.forEach(function (event) {
 			if (task[event]) {
 				page[event] = function () {
@@ -447,7 +465,7 @@ var confess = {
 
 	mergeConfig: function (config, configFile) {
 		if (!fs.exists(configFile)) {
-		   configFile = "config.json";
+			 configFile = "config.json";
 		}
 		var result = JSON.parse(fs.read(configFile)),
 			key;
