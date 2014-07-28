@@ -127,6 +127,29 @@ var confess = {
 				}
 			});
 
+			if (config.performance.machine) {
+				var output = {
+					"general": {
+						"start": start,
+						"finish": finish,
+						"domcontentloaded": domcontentloaded
+					},
+					"resources": {
+						"general": {
+							"slowest": slowest.id,
+							"fastest": fastest.id,
+							"totalDuration": totalDuration,
+							"smallest": smallest.id,
+							"largest": largest.id,
+							"totalSize": totalSize
+						},
+						"details": resources
+					}
+				};
+				console.log(JSON.stringify(output, undefined, 2));
+				return;
+			}
+
 			if (config.verbose) {
 				console.log('');
 				this.emitConfig(config, '');
