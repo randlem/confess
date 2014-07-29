@@ -57,7 +57,9 @@ The other thing it can do is generate a simple performance analysis of a site:
 ...which will write, to stdout, something like:
 
     Elapsed load time:   6370ms
+     DOMContentLoaded:   3351ms
        # of resources:       21
+       
 
      Fastest resource:    147ms; http://functionsource.com/...egacy.js
      Slowest resource:   2766ms; http://use.typekit.com/...z3zpc-b.css
@@ -193,5 +195,7 @@ These properties are used as follows:
  * <code>appcache.cacheFilter</code> - a regex to indicate which files to include in the <code>CACHE</code> block of the manifest. If set to <code>null</code>, none will. As a better example, <code>\\\\.png$</code> will indicate that only PNG files should be cached. (Note the double escaping: once for the regex, and once for the JSON.)
 
  * <code>appcache.networkFilter</code> - a regex to indicate which files *not* to include in the <code>CACHE</code> block of the manifest, and which a browser will request from the network. If set to <code>null</code>, none will. Note that matching files will *not* be explicitly listed in the <code>NETWORK</code> block of the manifest, since there is always a catch-all <code>*</code> wildcard added.
+
+ * <code>performance.machine</code> - if set to true, will output the results of performance testing as a JSON string.
 
 Note that there are currently no specific configuration options for the <code>performance</code> task.
