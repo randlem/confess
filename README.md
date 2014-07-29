@@ -198,4 +198,3 @@ These properties are used as follows:
 
  * <code>performance.machine</code> - if set to true, will output the results of performance testing as a JSON string.
 
-Note that there are currently no specific configuration options for the <code>performance</code> task.
