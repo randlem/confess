@@ -132,6 +132,7 @@ var confess = {
 					"general": {
 						"start": start,
 						"finish": finish,
+						"elapsed": elapsed,
 						"domcontentloaded": domcontentloaded
 					},
 					"resources": {
@@ -146,7 +147,7 @@ var confess = {
 						"details": resources
 					}
 				};
-				console.log(JSON.stringify(output, undefined, 2));
+				console.log(JSON.stringify(output));
 				return;
 			}
 

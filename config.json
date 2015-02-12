@@ -14,4 +14,7 @@
     "cacheFilter": ".*",
     "networkFilter": null
   },
+  "performance": {
+    "machine": true
+  }
 }
